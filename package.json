@@ -1,0 +1,55 @@
+{
+  "name": "@geeklab.app/audiencelab-react-web-sdk",
+  "version": "0.9.0",
+  "description": "React Web SDK for AudienceLab by Geeklab",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "tsup src/index.tsx --format cjs,esm --dts --minify",
+    "prepublishOnly": "npm run build",
+    "p": "npm version patch && npm run build && npm pack"
+  },
+  "dependencies": {
+    "axios": "^1.7.8",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "tsup": "^8.3.5",
+    "vite": "^6.0.3"
+  },
+  "keywords": [
+    "react",
+    "sdk",
+    "web",
+    "audiencelab",
+    "geeklab"
+  ],
+  "author": "Geeklab Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Geeklab-Ltd/audiencelab_react_web_sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Geeklab-Ltd/audiencelab_react_web_sdk/issues"
+  },
+  "homepage": "https://github.com/Geeklab-Ltd/audiencelab_react_web_sdk#readme"
+}
