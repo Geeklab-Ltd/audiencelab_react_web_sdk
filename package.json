@@ -1,6 +1,6 @@
 {
   "name": "@geeklab.app/audiencelab-react-web-sdk",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "React Web SDK for AudienceLab by Geeklab",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
