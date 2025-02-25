@@ -1,6 +1,6 @@
 {
   "name": "@geeklab.app/audiencelab-react-web-sdk",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "React Web SDK for AudienceLab by Geeklab",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -43,7 +43,7 @@
     "geeklab"
   ],
   "author": "Geeklab Team",
-  "license": "MIT",
+  "license": "GEEKLAB SDK EULA",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Geeklab-Ltd/audiencelab_react_web_sdk.git"

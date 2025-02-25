@@ -78,13 +78,17 @@ sendCustomAdEvent(
 
 ## API Reference
 
-### `initializeAudiencelab(apiKey: string): Promise<{ token: string, metrics: any }>`
+```javascript
+initializeAudiencelab(apiKey: string): Promise<{ token: string, metrics: any }>
+```
 
 Initializes the SDK with the provided API key.
 
 - **apiKey**: Your API key for the Geeklab AudienceLab service.
 
-### `sendCustomPurchaseEvent(id: string, name: string, value: number, currency: string, status: string): Promise<any>`
+```javascript
+sendCustomPurchaseEvent(id: string, name: string, value: number, currency: string, status: string): Promise<any>
+```
 
 Sends a custom purchase event.
 
@@ -94,7 +98,9 @@ Sends a custom purchase event.
 - **currency**: The currency of the purchase.
 - **status**: The status of the purchase (e.g., 'completed').
 
-### `sendCustomAdEvent(adId: string, name: string, source: string, watchTime: number, reward: boolean, mediaSource: string, channel: string, value: number, currency: string): Promise<any>`
+```javascript
+sendCustomAdEvent(adId: string, name: string, source: string, watchTime: number, reward: boolean, mediaSource: string, channel: string, value: number, currency: string): Promise<any>
+```
 
 Sends a custom ad event.
 
@@ -110,7 +116,7 @@ Sends a custom ad event.
 
 ## License
 
-This SDK is licensed under the MIT License.
+This project is licensed under the terms of the [GEEKLAB SDK EULA](https://github.com/Geeklab-Ltd/audiencelab_unity_sdk/blob/main/LICENSE.md).
 
 ## Contributing
 

@@ -31,7 +31,7 @@ export const initializeAudiencelab = async (apiKey: string) => {
 
   try {
     // Initialize retention tracking
-    updateRetention();
+    // updateRetention();
 
     // Fetch creative token and send metrics in parallel
     const [token, metrics] = await Promise.all([
@@ -133,13 +133,18 @@ export const sendUserMetrics = async () => {
     return;
   }
 
-  const retentionData = updateRetention();
+  try {
+    const retentionData = await updateRetention();
+    if (!retentionData) {
+      return;
+    }
 
-  if (!retentionData) {
+    const resolvedData = await Promise.resolve(retentionData);
+
+    return await sendWebhookRequest("retention", resolvedData);
+  } catch (error) {
     return;
   }
-
-  return sendWebhookRequest("retention", retentionData);
 };
 
 export const sendCustomPurchaseEvent = async (
@@ -199,7 +204,9 @@ export const sendWebhookRequest = async (type: string, data: any) => {
   const offset = currentDate.getTimezoneOffset();
   const hours = Math.abs(Math.floor(offset / 60));
   const minutes = Math.abs(offset % 60);
-  const utcOffset = `${offset <= 0 ? "+" : "-"}${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  const utcOffset = `${offset <= 0 ? "+" : "-"}${hours
+    .toString()
+    .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
 
   const retentionDay = (await getItem("retentionDay")) || "";
   const creativeToken = await getItem("creativeToken");
