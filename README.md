@@ -9,6 +9,10 @@ To install the SDK, use npm:
 ```bash
 npm install @geeklab.app/audiencelab-react-web-sdk
 ```
+For Angular projects:
+```bash
+npm install @geeklab.app/audiencelab-angular-sdk
+```
 
 ## Usage
 
