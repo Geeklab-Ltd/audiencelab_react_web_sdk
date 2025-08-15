@@ -1,6 +1,14 @@
 # Geeklab AudienceLab SDK
 
-The Geeklab AudienceLab SDK is a powerful tool for integrating audience analytics and event tracking into your React applications.
+The Geeklab AudienceLab SDK is a powerful tool for integrating audience analytics and event tracking into your React applications. **Now fully compatible with [Capacitor](https://capacitorjs.com/) for cross-platform mobile development!**
+
+## Features
+
+- 📊 **Comprehensive Analytics**: Track user behavior, purchases, and ad interactions
+- 📱 **Capacitor Compatible**: Enhanced device information on mobile platforms
+- 🔄 **Cross-Platform**: Works on web, iOS, and Android
+- 🛡️ **Robust Fallbacks**: Graceful degradation when native APIs aren't available
+- 🎯 **Easy Integration**: Simple API for React applications
 
 ## Installation
 
@@ -10,6 +18,15 @@ To install the SDK, use npm:
 npm install @geeklab.app/audiencelab-react-web-sdk
 ```
 
+### Capacitor Integration (Optional)
+
+For enhanced device information on mobile platforms, install Capacitor:
+
+```bash
+npm install @capacitor/core @capacitor/device
+npx cap sync
+```
+
 ## Usage
 
 ### Initialization
@@ -17,7 +34,7 @@ npm install @geeklab.app/audiencelab-react-web-sdk
 Before using the SDK, you need to initialize it with your API key (string):
 
 ```javascript
-import { initializeAudiencelab } from "@geeklab.app/audiencelab-sdk";
+import { initializeAudiencelab } from "@geeklab.app/audiencelab-react-web-sdk";
 const apiKey = "YOUR_API_KEY_HERE";
 initializeAudiencelab(apiKey)
   .then(({ token, metrics }) => {
@@ -28,6 +45,19 @@ initializeAudiencelab(apiKey)
   });
 ```
 
+### Capacitor Environment Detection
+
+The SDK automatically detects Capacitor environments and provides enhanced device information:
+
+```javascript
+import { isCapacitorEnvironment, getCapacitorDeviceInfo } from "@geeklab.app/audiencelab-react-web-sdk";
+
+if (isCapacitorEnvironment()) {
+  const deviceInfo = await getCapacitorDeviceInfo();
+  console.log("Device info:", deviceInfo);
+}
+```
+
 ### Sending Custom Events
 
 #### Purchase Event
@@ -35,7 +65,7 @@ initializeAudiencelab(apiKey)
 To send a purchase event, use the `sendCustomPurchaseEvent` function:
 
 ```javascript
-import { sendCustomPurchaseEvent } from "@geeklab.app/audiencelab-sdk";
+import { sendCustomPurchaseEvent } from "@geeklab.app/audiencelab-react-web-sdk";
 sendCustomPurchaseEvent(
   "item123",
   "Premium Subscription",
@@ -56,7 +86,7 @@ sendCustomPurchaseEvent(
 To send a ad event, use the `sendCustomAdEvent` function:
 
 ```javascript
-import { sendCustomAdEvent } from "@geeklab.app/audiencelab-sdk";
+import { sendCustomAdEvent } from "@geeklab.app/audiencelab-react-web-sdk";
 sendCustomAdEvent(
   "ad456",
   "Video Ad",
@@ -75,6 +105,27 @@ sendCustomAdEvent(
     console.error("Failed to send ad event:", error);
   });
 ```
+
+## Capacitor Compatibility
+
+This SDK is fully compatible with [Capacitor](https://capacitorjs.com/) and provides enhanced functionality when used in Capacitor environments:
+
+### Enhanced Features in Capacitor
+
+- **Better Device Detection**: Uses native device APIs for accurate device information
+- **Improved Battery Detection**: Leverages Capacitor's battery API when available
+- **Network Information**: Enhanced network status detection
+- **Automatic Fallbacks**: Gracefully falls back to web APIs when native APIs aren't available
+
+### Platform Support
+
+| Platform | Device Info | Battery | Network | WebGL |
+|----------|-------------|---------|---------|-------|
+| Web | ✅ User Agent | ✅ Web API | ✅ Web API | ✅ Full |
+| iOS | ✅ Native | ⚠️ Limited | ✅ Native | ✅ Full |
+| Android | ✅ Native | ✅ Native | ✅ Native | ✅ Full |
+
+For detailed Capacitor integration instructions, see [CAPACITOR_INTEGRATION.md](./CAPACITOR_INTEGRATION.md).
 
 ## API Reference
 
@@ -114,6 +165,32 @@ Sends a custom ad event.
 - **value**: The value associated with the ad.
 - **currency**: The currency of the value.
 
+### Capacitor-Specific APIs
+
+```javascript
+isCapacitorEnvironment(): boolean
+```
+
+Returns true if the SDK is running in a Capacitor environment.
+
+```javascript
+getCapacitorDeviceInfo(): Promise<CapacitorDeviceInfo>
+```
+
+Returns enhanced device information when available in Capacitor environments.
+
+```javascript
+getCapacitorNetworkInfo(): Promise<CapacitorNetworkInfo>
+```
+
+Returns network information when available in Capacitor environments.
+
+```javascript
+getCapacitorBatteryInfo(): Promise<BatteryInfo | null>
+```
+
+Returns battery information when available in Capacitor environments.
+
 ## License
 
 This project is licensed under the terms of the [GEEKLAB SDK EULA](https://github.com/Geeklab-Ltd/audiencelab_unity_sdk/blob/main/LICENSE.md).
@@ -125,3 +202,5 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 ## Support
 
 For support, please contact [support@geeklab.app](mailto:support@geeklab.app).
+
+For Capacitor-specific issues, see the [Capacitor Integration Guide](./CAPACITOR_INTEGRATION.md).

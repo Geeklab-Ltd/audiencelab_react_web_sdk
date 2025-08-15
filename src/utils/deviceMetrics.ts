@@ -5,6 +5,7 @@ import { getInstalledFonts } from "./metrics/getInstalledFonts";
 import { getBatteryLevel } from "./metrics/getBatteryLevel";
 import { getTimezone } from "./metrics/getTimezone";
 import { FONTLIST } from "./metrics/fontList";
+import { getCapacitorDeviceInfo, isCapacitorEnvironment } from "./capacitorCompatibility.js";
 
 export const getDeviceMetrics = async () => {
   try {
@@ -55,17 +56,59 @@ export const getDeviceMetrics = async () => {
         results[2].value.height * (window.devicePixelRatio || 1);
     }
 
-    // Get device info from navigator and window
+    // Get device info - try Capacitor first, then fallback to user agent parsing
     const userAgent = window.navigator.userAgent;
     const platform = navigator.platform || "Unknown";
 
-    // Parse user agent for device details
-    metrics.deviceName = platform || "Unknown";
-    metrics.deviceModel = "Unknown"; // Not reliably available in web
-    const osVersionMatch = userAgent.match(
-      /(?:(?:OS|Windows NT|Android) )(\d+[._]\d+)/
-    );
-    metrics.osVersion = osVersionMatch ? osVersionMatch[1] : "Unknown";
+    // Try to get Capacitor device info first
+    const capacitorInfo = await getCapacitorDeviceInfo();
+    const isCapacitor = isCapacitorEnvironment();
+
+    let deviceName = platform;
+    let deviceModel = "Unknown";
+    let osVersion = "Unknown";
+
+    // Use Capacitor info if available
+    if (capacitorInfo.name || capacitorInfo.model || capacitorInfo.osVersion) {
+      deviceName = capacitorInfo.name || deviceName;
+      deviceModel = capacitorInfo.model || deviceModel;
+      osVersion = capacitorInfo.osVersion || osVersion;
+    } else {
+      // Enhanced device detection for Capacitor environments
+      if (userAgent.includes("iPhone") || userAgent.includes("iPad")) {
+        deviceName = "iOS";
+        const match = userAgent.match(/OS (\d+_\d+)/);
+        osVersion = match ? match[1].replace("_", ".") : "Unknown";
+        deviceModel = userAgent.includes("iPhone") ? "iPhone" : "iPad";
+      } else if (userAgent.includes("Android")) {
+        deviceName = "Android";
+        const match = userAgent.match(/Android (\d+\.\d+)/);
+        osVersion = match ? match[1] : "Unknown";
+        // Try to extract device model from user agent
+        const modelMatch = userAgent.match(/\(Linux; U; Android [^;]+; ([^;]+)/);
+        deviceModel = modelMatch ? modelMatch[1] : "Android Device";
+      } else if (userAgent.includes("Windows")) {
+        deviceName = "Windows";
+        const match = userAgent.match(/Windows NT (\d+\.\d+)/);
+        osVersion = match ? match[1] : "Unknown";
+      } else if (userAgent.includes("Mac OS X")) {
+        deviceName = "macOS";
+        const match = userAgent.match(/Mac OS X (\d+[._]\d+)/);
+        osVersion = match ? match[1].replace("_", ".") : "Unknown";
+      } else if (userAgent.includes("Linux")) {
+        deviceName = "Linux";
+        osVersion = "Unknown";
+      }
+    }
+
+    if (isCapacitor && !capacitorInfo.name) {
+      // In Capacitor, we might get more accurate device info
+      deviceName = deviceName || "Capacitor Device";
+    }
+
+    metrics.deviceName = deviceName;
+    metrics.deviceModel = deviceModel;
+    metrics.osVersion = osVersion;
 
     // Timezone
     if (results[3].status === "fulfilled") metrics.timezone = results[3].value;

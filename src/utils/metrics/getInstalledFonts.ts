@@ -13,6 +13,9 @@ export const getInstalledFonts = async (
 
       span.style.fontSize = testSize;
       span.textContent = testString;
+      span.style.position = "absolute";
+      span.style.visibility = "hidden";
+      span.style.left = "-9999px";
       document.body.appendChild(span);
 
       // Measure the default widths and heights with base fonts
@@ -24,23 +27,35 @@ export const getInstalledFonts = async (
 
       // Check each font in the fontsToCheck array
       for (const font of fontsToCheck) {
-        let isDetected = baseFonts.some((baseFont) => {
-          span.style.fontFamily = `'${font}', ${baseFont}`;
-          return (
-            span.offsetWidth !== defaultWidths[baseFont] ||
-            span.offsetHeight !== defaultHeights[baseFont]
-          );
-        });
+        try {
+          let isDetected = baseFonts.some((baseFont) => {
+            span.style.fontFamily = `'${font}', ${baseFont}`;
+            return (
+              span.offsetWidth !== defaultWidths[baseFont] ||
+              span.offsetHeight !== defaultHeights[baseFont]
+            );
+          });
 
-        if (isDetected) {
-          detectedFonts.push(font);
+          if (isDetected) {
+            detectedFonts.push(font);
+          }
+        } catch (fontError) {
+          // Skip fonts that cause errors (common in Capacitor)
+          console.warn(`Font detection failed for ${font}:`, fontError);
+          continue;
         }
       }
 
-      document.body.removeChild(span);
+      // Clean up
+      if (document.body.contains(span)) {
+        document.body.removeChild(span);
+      }
+      
       resolve(detectedFonts);
     } catch (error) {
-      reject(error);
+      // Return empty array instead of rejecting for better Capacitor compatibility
+      console.warn("Font detection failed:", error);
+      resolve([]);
     }
   });
 };

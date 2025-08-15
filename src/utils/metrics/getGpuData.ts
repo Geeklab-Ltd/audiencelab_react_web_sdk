@@ -6,34 +6,50 @@ export const fetchGpuInfo = async (): Promise<{
   return new Promise((resolve, reject) => {
     try {
       const canvas = document.createElement("canvas");
-      // Use type assertion here
+      
+      // Try multiple WebGL contexts for better Capacitor compatibility
       const gl = (canvas.getContext("webgl") ||
-        canvas.getContext(
-          "experimental-webgl"
-        )) as WebGLRenderingContext | null;
+        canvas.getContext("experimental-webgl") ||
+        canvas.getContext("webgl2")) as WebGLRenderingContext | WebGL2RenderingContext | null;
 
       if (!gl) {
-        throw new Error(
-          "Unable to initialize WebGL. Your browser may not support it."
-        );
+        // Fallback for environments where WebGL is not available
+        resolve({
+          renderer: "Unknown",
+          vendor: "Unknown", 
+          version: "Unknown"
+        });
+        return;
       }
 
       const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
 
       if (debugInfo) {
         const gpuInfo = {
-          renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL),
-          vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
-          version: gl.getParameter(gl.VERSION) as string,
+          renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || "Unknown",
+          vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || "Unknown",
+          version: gl.getParameter(gl.VERSION) as string || "Unknown",
         };
         resolve(gpuInfo);
       } else {
-        throw new Error(
-          "WEBGL_debug_renderer_info is not supported by your browser."
-        );
+        // Fallback when debug info is not available (common in Capacitor)
+        const renderer = gl.getParameter(gl.RENDERER) || "Unknown";
+        const vendor = gl.getParameter(gl.VENDOR) || "Unknown";
+        const version = gl.getParameter(gl.VERSION) as string || "Unknown";
+        
+        resolve({
+          renderer,
+          vendor,
+          version
+        });
       }
     } catch (error) {
-      reject(error);
+      // Return default values instead of rejecting
+      resolve({
+        renderer: "Unknown",
+        vendor: "Unknown",
+        version: "Unknown"
+      });
     }
   });
 };
