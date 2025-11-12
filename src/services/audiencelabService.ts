@@ -3,6 +3,12 @@ import { prepareTokenPayload } from "../utils/preparePayload.js";
 import { getDeviceMetrics } from "../utils/deviceMetrics.js";
 import { updateRetention } from "../utils/retentionCalculator.js";
 import { saveItem, getItem } from "../utils/storageFunctionalities.js";
+import {
+  addToTotalAdValue,
+  getTotalAdValue,
+  addToTotalPurchaseValue,
+  getTotalPurchaseValue,
+} from "../utils/totalValueTracker.js";
 
 const API_BASE_URL = "https://analytics.geeklab.app";
 
@@ -152,15 +158,31 @@ export const sendCustomPurchaseEvent = async (
   name: string,
   value: number,
   currency: string,
-  status: string
+  status: string,
+  tr_id?: string | null
 ) => {
-  const data = {
+  // Add to the cumulative purchase value if status is Completed or Success
+  let totalPurchaseValue = await getTotalPurchaseValue();
+  if (
+    status &&
+    (status.toLowerCase() === "completed" || status.toLowerCase() === "success")
+  ) {
+    totalPurchaseValue = await addToTotalPurchaseValue(value);
+  }
+
+  const data: any = {
     item_id: id,
     item_name: name,
     value: value,
     currency: currency,
     status: status,
+    total_purchase_value: totalPurchaseValue,
   };
+
+  // Include transaction ID if provided
+  if (tr_id) {
+    data.tr_id = tr_id;
+  }
 
   return sendWebhookRequest("custom.purchase", data);
 };
@@ -176,6 +198,9 @@ export const sendCustomAdEvent = async (
   value: number,
   currency: string
 ) => {
+  // Add to the cumulative ad value
+  const totalAdValue = await addToTotalAdValue(value);
+
   const data = {
     ad_id: adId,
     name: name,
@@ -186,9 +211,22 @@ export const sendCustomAdEvent = async (
     channel: channel,
     value: value,
     currency: currency,
+    total_ad_value: totalAdValue,
   };
 
   return sendWebhookRequest("custom.ad", data);
+};
+
+export const sendCustomEvent = async (
+  eventName: string,
+  params: { value: string; id?: string; key?: string }
+) => {
+  const data = {
+    event_name: eventName,
+    params: params,
+  };
+
+  return sendWebhookRequest("custom", data);
 };
 
 export const sendWebhookRequest = async (type: string, data: any) => {

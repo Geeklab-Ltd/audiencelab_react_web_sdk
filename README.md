@@ -50,7 +50,10 @@ initializeAudiencelab(apiKey)
 The SDK automatically detects Capacitor environments and provides enhanced device information:
 
 ```javascript
-import { isCapacitorEnvironment, getCapacitorDeviceInfo } from "@geeklab.app/audiencelab-react-web-sdk";
+import {
+  isCapacitorEnvironment,
+  getCapacitorDeviceInfo,
+} from "@geeklab.app/audiencelab-react-web-sdk";
 
 if (isCapacitorEnvironment()) {
   const deviceInfo = await getCapacitorDeviceInfo();
@@ -71,7 +74,8 @@ sendCustomPurchaseEvent(
   "Premium Subscription",
   9.99,
   "USD",
-  "completed"
+  "completed",
+  "txn_abc123" // Optional transaction ID
 )
   .then((response) => {
     console.log("Purchase event sent successfully:", response);
@@ -80,6 +84,8 @@ sendCustomPurchaseEvent(
     console.error("Failed to send purchase event:", error);
   });
 ```
+
+**Note**: The SDK automatically includes `total_purchase_value` in the purchase event payload. This value is only incremented when the status is "completed" or "success". The `tr_id` (transaction ID) parameter is optional and can be used for better transaction tracking and deduplication.
 
 #### Ad Event
 
@@ -106,6 +112,27 @@ sendCustomAdEvent(
   });
 ```
 
+**Note**: The SDK automatically includes `total_ad_value` in the ad event payload, which tracks the cumulative ad value across all ad events.
+
+#### Custom Event
+
+To send a custom event, use the `sendCustomEvent` function:
+
+```javascript
+import { sendCustomEvent } from "@geeklab.app/audiencelab-react-web-sdk";
+sendCustomEvent("user_achievement", {
+  value: "100",
+  id: "achievement_123",
+  key: "level_complete",
+})
+  .then((response) => {
+    console.log("Custom event sent successfully:", response);
+  })
+  .catch((error) => {
+    console.error("Failed to send custom event:", error);
+  });
+```
+
 ## Capacitor Compatibility
 
 This SDK is fully compatible with [Capacitor](https://capacitorjs.com/) and provides enhanced functionality when used in Capacitor environments:
@@ -119,11 +146,11 @@ This SDK is fully compatible with [Capacitor](https://capacitorjs.com/) and prov
 
 ### Platform Support
 
-| Platform | Device Info | Battery | Network | WebGL |
-|----------|-------------|---------|---------|-------|
-| Web | ✅ User Agent | ✅ Web API | ✅ Web API | ✅ Full |
-| iOS | ✅ Native | ⚠️ Limited | ✅ Native | ✅ Full |
-| Android | ✅ Native | ✅ Native | ✅ Native | ✅ Full |
+| Platform | Device Info   | Battery    | Network    | WebGL   |
+| -------- | ------------- | ---------- | ---------- | ------- |
+| Web      | ✅ User Agent | ✅ Web API | ✅ Web API | ✅ Full |
+| iOS      | ✅ Native     | ⚠️ Limited | ✅ Native  | ✅ Full |
+| Android  | ✅ Native     | ✅ Native  | ✅ Native  | ✅ Full |
 
 For detailed Capacitor integration instructions, see [CAPACITOR_INTEGRATION.md](./CAPACITOR_INTEGRATION.md).
 
@@ -138,7 +165,7 @@ Initializes the SDK with the provided API key.
 - **apiKey**: Your API key for the Geeklab AudienceLab service.
 
 ```javascript
-sendCustomPurchaseEvent(id: string, name: string, value: number, currency: string, status: string): Promise<any>
+sendCustomPurchaseEvent(id: string, name: string, value: number, currency: string, status: string, tr_id?: string | null): Promise<any>
 ```
 
 Sends a custom purchase event.
@@ -148,6 +175,7 @@ Sends a custom purchase event.
 - **value**: The value of the purchase.
 - **currency**: The currency of the purchase.
 - **status**: The status of the purchase (e.g., 'completed').
+- **tr_id**: Optional transaction ID for better transaction tracking and deduplication.
 
 ```javascript
 sendCustomAdEvent(adId: string, name: string, source: string, watchTime: number, reward: boolean, mediaSource: string, channel: string, value: number, currency: string): Promise<any>
@@ -164,6 +192,56 @@ Sends a custom ad event.
 - **channel**: The channel of the ad.
 - **value**: The value associated with the ad.
 - **currency**: The currency of the value.
+
+```javascript
+sendCustomEvent(eventName: string, params: { value: string; id?: string; key?: string }): Promise<any>
+```
+
+Sends a custom event.
+
+- **eventName**: The name of the custom event.
+- **params**: An object containing event parameters.
+  - **value**: The value of the event (required).
+  - **id**: Optional ID associated with the event.
+  - **key**: Optional key associated with the event.
+
+### Total Value Tracking Functions
+
+The SDK automatically tracks cumulative ad value and purchase value. These values are stored locally and included in event payloads.
+
+```javascript
+getTotalAdValue(): Promise<number>
+```
+
+Retrieve the current cumulative ad value stored locally on the device.
+
+**Example Usage**:
+
+```javascript
+import { getTotalAdValue } from "@geeklab.app/audiencelab-react-web-sdk";
+
+const totalValue = await getTotalAdValue();
+console.log(`User has generated $${totalValue.toFixed(2)} in total ad value`);
+```
+
+```javascript
+getTotalPurchaseValue(): Promise<number>
+```
+
+Retrieve the current cumulative purchase value stored locally on the device.
+
+**Example Usage**:
+
+```javascript
+import { getTotalPurchaseValue } from "@geeklab.app/audiencelab-react-web-sdk";
+
+const totalPurchaseValue = await getTotalPurchaseValue();
+console.log(
+  `User has spent $${totalPurchaseValue.toFixed(2)} in total purchases`
+);
+```
+
+**Note**: The `total_purchase_value` is only incremented when the purchase status is "completed" or "success". The `total_ad_value` is incremented for every ad event sent.
 
 ### Capacitor-Specific APIs
 

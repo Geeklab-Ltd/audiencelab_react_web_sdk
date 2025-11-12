@@ -5,6 +5,8 @@ export interface CustomPurchaseEvent {
   value: number
   currency: string
   status: string
+  total_purchase_value: number
+  tr_id?: string
 }
 
 export interface CustomAdEvent {
@@ -17,4 +19,16 @@ export interface CustomAdEvent {
   channel: string
   value: number
   currency: string
+  total_ad_value: number
+}
+
+export interface CustomEventParams {
+  value: string
+  id?: string
+  key?: string
+}
+
+export interface CustomEvent {
+  event_name: string
+  params: CustomEventParams
 }
